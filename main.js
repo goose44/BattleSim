@@ -12,8 +12,16 @@ class Corps {
     }
     // unit's movement to target
     update(target) {
-        if (this.x < target.x) this.x += this.speed;
-        if (this.x > target.x) this.x -= this.speed;
+        let dx = target.x - this.x;
+        let dy = target.y - this.y;
+
+        // diagonal movements
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > 0) {
+            this.x += (dx / distance);
+            this.y += (dy / distance);
+        }
     }
     // makes this unit square
     draw() {
@@ -38,5 +46,5 @@ function gameLoop() {
 
     requestAnimationFrame(gameLoop);
 }
-//
+// 
 gameLoop();
