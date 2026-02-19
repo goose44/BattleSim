@@ -9,6 +9,9 @@ class Corps {
         this.size = 40;
         this.color = color;
         this.speed = 1;
+        this.health = 100;
+        this.attack = 10;
+        this.attackCooldown = 0;
     }
     // unit's movement to target
     update(target) {
@@ -18,15 +21,32 @@ class Corps {
         // diagonal movements
         let distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance > 0) {
+        if (distance > this.size) {
             this.x += (dx / distance);
             this.y += (dy / distance);
+        // attacking    
+        } else {
+            if (this.attackCooldown <= 0){
+                target.health -= this.attack;
+                this.attackCooldown = 30;
+            }
+        }
+        if (this.attackCooldown > 0) {
+            this.attackCooldown--;
         }
     }
     // makes this unit square
     draw() {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.size, this.size);
+
+        // health bar
+        ctx.fillStyle = "black";
+        ctx.fillRect(this.x, this.y - 10, this.size, 5);
+
+        // health amount
+        ctx.fillStyle = "green";
+        ctx.fillRect(this.x, this.y - 10, this.size * (this.health / 100), 5);
     }
 }
 //unit's starting location and color
@@ -36,13 +56,13 @@ const blue = new Corps(600, 400, "blue");
 function gameLoop() {
     ctx.clearRect (0,0, canvas.width, canvas.height);
 
-    // movement
-    red.update(blue);
-    blue.update(red);
+    if (red.health > 0 && blue.health > 0) {
+        red.update(blue);
+        blue.update(red);
+    }
 
-    // puts them into their position
-    red.draw();
-    blue.draw();
+    if (red.health > 0) red.draw();
+    if (blue.health > 0) blue.draw();
 
     requestAnimationFrame(gameLoop);
 }
