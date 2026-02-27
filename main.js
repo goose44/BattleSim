@@ -12,28 +12,36 @@ class Corps {
         this.health = 100;
         this.attack = 10;
         this.attackCooldown = 0;
+        this.moveTarget = null;
+        this.attackTarget = null;
     }
     // unit's movement to target
-    update(target) {
-        let dx = target.x - this.x;
-        let dy = target.y - this.y;
+    update() {
+        // movement
+        if (this.moveTarget){
+            let dx = this.moveTarget.x - this.x;
+            let dy = this.moveTarget.y - this.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
 
-        // diagonal movements
-        let distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance > this.size) {
-            this.x += (dx / distance);
-            this.y += (dy / distance);
-        // attacking    
-        } else {
-            if (this.attackCooldown <= 0){
-                target.health -= this.attack;
-                this.attackCooldown = 30;
+            if (distance > this.size){
+                this.x += (dx / distance) * this.speed;
+                this.y += (dy / distance) * this.speed;
             }
         }
-        if (this.attackCooldown > 0) {
-            this.attackCooldown--;
+        // attack
+        if (this.attackTarget){
+            let dx = this.moveTarget.x - this.x;
+            let dy = this.moveTarget.y - this.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance <= this.size){
+                if (this.attackCooldown <= 0) {
+                    this.attackTarget.health -= this.attack;
+                    this.attackCooldown = 30;
+                }
+            }
         }
+        if (this.attackCooldown > 0) this.attackCooldown--;
     }
     // makes this unit square
     draw() {
@@ -57,14 +65,20 @@ function gameLoop() {
     ctx.clearRect (0,0, canvas.width, canvas.height);
 
     if (red.health > 0 && blue.health > 0) {
+        red.moveTarget = blue;
+        red.attackTarget = blue;
+
+        blue.moveTarget = red;
+        blue.attackTarget = red;
+
         red.update(blue);
         blue.update(red);
     }
-
+    // alive units
     if (red.health > 0) red.draw();
     if (blue.health > 0) blue.draw();
 
     requestAnimationFrame(gameLoop);
 }
-// 
+
 gameLoop();
